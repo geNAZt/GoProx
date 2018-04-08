@@ -26,7 +26,7 @@ func (self *SessionManager) GetSession(conn *net.UDPConn, addr *net.UDPAddr) *Se
 	}
 
 	// Construct new session
-	session := ConstructSession(conn, addr)
+	session := ConstructSession(self.guid, conn, addr)
 	if session != nil {
 		self.sessions.Store(addr, session)
 	}

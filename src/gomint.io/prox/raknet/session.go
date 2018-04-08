@@ -11,11 +11,13 @@ type Session struct {
 	addr        *net.UDPAddr
 	conn        *net.UDPConn
 	packetInput chan []byte
+	guid        []byte
 }
 
-func ConstructSession(conn *net.UDPConn, addr *net.UDPAddr) *Session {
+func ConstructSession(guid []byte, conn *net.UDPConn, addr *net.UDPAddr) *Session {
 	// Create new session and return
 	session := &Session{
+		guid:        guid,
 		addr:        addr,
 		conn:        conn,
 		packetInput: make(chan []byte, 10),
@@ -67,11 +69,18 @@ func (self *Session) handleUnconnectedPing(buf *bytes.Buffer) {
 
 	// We answer with 0x1C (UNCONNECTED_PONG with MOTD) contains out of packetID + 2 longs + OFFLINE_ID + short + motd bytes
 	motd := "§cGoProx §f- §6Golden performance"
-	answerBytes := make([]byte, 0, 35 + len(motd))
+	answerBytes := make([]byte, 0, 35+len(motd))
 	answer := bytes.NewBuffer(answerBytes)
 	answer.WriteByte(UNCONNECTED_PONG_WITH_MOTD)
 	answer.Write(longBuf)
-	answer.Write()
+	answer.Write(self.guid)
+
+	motdLengthBytes := make([]byte, 2)
+	binary.BigEndian.PutUint16(motdLengthBytes, uint16(len(motd)))
+	answer.Write(motdLengthBytes)
+	answer.Write([]byte(motd))
 
 	log.Printf("Found ping %v\n", ping)
+
+	self.conn.WriteMsgUDP(answer.Bytes(), []byte{}, self.addr)
 }
