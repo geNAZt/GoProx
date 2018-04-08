@@ -3,8 +3,8 @@ package raknet
 import (
 	"net"
 	"strconv"
-	"log"
 	"crypto/rand"
+	"gomint.io/prox/log"
 )
 
 type UDPSocket struct {
@@ -13,7 +13,7 @@ type UDPSocket struct {
 }
 
 func ConstructUDPSocket() *UDPSocket {
-	guid := make([]byte, 16)
+	guid := make([]byte, 8)
 	rand.Read(guid)
 
 	return &UDPSocket{
@@ -25,30 +25,29 @@ func ConstructUDPSocket() *UDPSocket {
 func (self *UDPSocket) Listen(ip string, port int) {
 	udpAddr, err := net.ResolveUDPAddr("udp", ip+":"+strconv.Itoa(port))
 	if err != nil {
-		log.Fatalf("Could not resolve UDP address: %v", err)
+		log.Fatal("Could not resolve UDP address: %v", err)
 	}
 
 	udpConn, err := net.ListenUDP("udp", udpAddr)
 	if err != nil {
-		log.Fatalf("Could not lsiten to UDP address: %v", err)
+		log.Fatal("Could not lsiten to UDP address: %v", err)
 	}
 
 	for {
-		buf := make([]byte, MAX_MTU)
+		buf := make([]byte, 65565)
 		bytesRead, addr, err := udpConn.ReadFromUDP(buf)
 		if err != nil {
-			log.Printf("Error while reading from UDP socket: %v\n", err)
+			log.Warn("Error while reading from UDP socket: %v", err)
 			continue
 		}
 
 		copyBuf := buf[0:bytesRead]
-		log.Printf("Addr: %v, Content: %v\n", addr, copyBuf)
+		log.Debug("Addr: %v, Content: %v", addr, copyBuf)
 
 		session := self.sessionManager.GetSession(udpConn, addr)
 		if session != nil {
-			log.Printf("Found session %v\n", session)
+			log.Debug("Found session %v", session)
 			session.PushDatagram(copyBuf)
 		}
-		// net.DialUDP("udp", udpAddr, addr)
 	}
 }

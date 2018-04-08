@@ -2,10 +2,16 @@ package raknet
 
 const (
 	// MTU stuff
-	MAX_MTU = 1492
+	MAX_MTU = 1464 	// Seems to be the maximum value MCPE supports
+	MIN_MTU = 548	// Seems to be the minimum value MCPE supports
+
+	PROTOCOL_VERSION = 8
 
 	// Packet IDs
 	UNCONNECTED_PING = 0x01
+	OPEN_CONNECTION_REQUEST_1 = 0x05
+	OPEN_CONNECTION_REPLY_1 = 0x06
+	INCOMPATIBLE_VERSION = 0x19
 	UNCONNECTED_PONG_WITH_MOTD = 0x1C
 )
 

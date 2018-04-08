@@ -1,14 +1,14 @@
 package main
 
 import (
-	"log"
 	"gomint.io/prox/config"
 	"gomint.io/prox/raknet"
+	"gomint.io/prox/log"
 )
 
 func main() {
 	// Get config
-	log.Printf("Going to bind %v\n", config.Config.Listener)
+	log.Info("Going to bind %v", config.Config.Listener)
 
 	// Create network
 	socket := raknet.ConstructUDPSocket()
